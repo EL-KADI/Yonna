@@ -1,1 +1,1 @@
-<a target=_blank href="https://yonna.vercel.app/signin" target="_blank">Yonna</a>
+<a href="https://yonna.vercel.app/signin" target="_blank">Yonna</a>

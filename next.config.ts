@@ -4,8 +4,7 @@ const nextConfig = {
     unoptimized: true,
   },
 
-  basePath: "/Yoona",
-  assetPrefix: "/Yoona",
+
   eslint: {
     ignoreDuringBuilds: true,
   },

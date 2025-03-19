@@ -256,7 +256,7 @@ export default function SignIn() {
             <Typography sx={{ textAlign: 'center' }}>
               Don&apos;t have an account?&nbsp;
               <Link
-                href="/Yoona/signup"
+                href="/signup"
                 variant="body2"
                 sx={{ alignSelf: 'center' }}
               >

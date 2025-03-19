@@ -135,14 +135,21 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [removeImage, setRemoveImage] = useState(false);
-  const [visibleComments, setVisibleComments] = useState<Record<string, number>>({});
+  const [visibleComments, setVisibleComments] = useState<
+    Record<string, number>
+  >({});
   const [newComment, setNewComment] = useState<Record<string, string>>({});
-  const [commentLoading, setCommentLoading] = useState<Record<string, boolean>>({});
+  const [commentLoading, setCommentLoading] = useState<Record<string, boolean>>(
+    {}
+  );
   const [editingComment, setEditingComment] = useState<string | null>(null);
   const [editCommentContent, setEditCommentContent] = useState("");
   const [editCommentLoading, setEditCommentLoading] = useState(false);
-  const [commentMenuAnchorEl, setCommentMenuAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
+  const [commentMenuAnchorEl, setCommentMenuAnchorEl] =
+    useState<null | HTMLElement>(null);
+  const [selectedCommentId, setSelectedCommentId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     const storedToken = localStorage.getItem("Token");
@@ -152,28 +159,31 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
   const handleExpandClick = (postId: string) => {
     setExpandedId(expandedId === postId ? null : postId);
     if (!visibleComments[postId]) {
-      setVisibleComments(prev => ({ ...prev, [postId]: COMMENTS_PER_PAGE }));
+      setVisibleComments((prev) => ({ ...prev, [postId]: COMMENTS_PER_PAGE }));
     }
   };
 
   const handleShowMoreComments = (postId: string) => {
-    setVisibleComments(prev => ({
+    setVisibleComments((prev) => ({
       ...prev,
-      [postId]: (prev[postId] || COMMENTS_PER_PAGE) + COMMENTS_PER_PAGE
+      [postId]: (prev[postId] || COMMENTS_PER_PAGE) + COMMENTS_PER_PAGE,
     }));
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
-  const handleMenuClick = (event: React.MouseEvent<HTMLElement>, postId: string) => {
+  const handleMenuClick = (
+    event: React.MouseEvent<HTMLElement>,
+    postId: string
+  ) => {
     setAnchorEl(event.currentTarget);
     setSelectedPostId(postId);
   };
@@ -182,7 +192,10 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
     setAnchorEl(null);
   };
 
-  const handleCommentMenuClick = (event: React.MouseEvent<HTMLElement>, commentId: string) => {
+  const handleCommentMenuClick = (
+    event: React.MouseEvent<HTMLElement>,
+    commentId: string
+  ) => {
     event.stopPropagation();
     setCommentMenuAnchorEl(event.currentTarget);
     setSelectedCommentId(commentId);
@@ -208,34 +221,39 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
     try {
       setEditCommentLoading(true);
 
-      const response = await fetch(`https://linked-posts.routemisr.com/comments/${commentId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          token: token,
-        },
-        body: JSON.stringify({
-          content: editCommentContent,
-        }),
-      });
+      const response = await fetch(
+        `https://linked-posts.routemisr.com/comments/${commentId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            token: token,
+          },
+          body: JSON.stringify({
+            content: editCommentContent,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to update comment");
       }
 
-      setPosts(posts.map(post => {
-        if (post._id === postId) {
-          return {
-            ...post,
-            comments: post.comments.map(comment => 
-              comment._id === commentId
-                ? { ...comment, content: editCommentContent }
-                : comment
-            ),
-          };
-        }
-        return post;
-      }));
+      setPosts(
+        posts.map((post) => {
+          if (post._id === postId) {
+            return {
+              ...post,
+              comments: post.comments.map((comment) =>
+                comment._id === commentId
+                  ? { ...comment, content: editCommentContent }
+                  : comment
+              ),
+            };
+          }
+          return post;
+        })
+      );
 
       setEditingComment(null);
       setEditCommentContent("");
@@ -254,26 +272,33 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
     }
 
     try {
-      const response = await fetch(`https://linked-posts.routemisr.com/comments/${commentId}`, {
-        method: "DELETE",
-        headers: {
-          token: token,
-        },
-      });
+      const response = await fetch(
+        `https://linked-posts.routemisr.com/comments/${commentId}`,
+        {
+          method: "DELETE",
+          headers: {
+            token: token,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to delete comment");
       }
 
-      setPosts(posts.map(post => {
-        if (post._id === postId) {
-          return {
-            ...post,
-            comments: post.comments.filter(comment => comment._id !== commentId),
-          };
-        }
-        return post;
-      }));
+      setPosts(
+        posts.map((post) => {
+          if (post._id === postId) {
+            return {
+              ...post,
+              comments: post.comments.filter(
+                (comment) => comment._id !== commentId
+              ),
+            };
+          }
+          return post;
+        })
+      );
 
       handleCommentMenuClose();
     } catch (error) {
@@ -295,7 +320,12 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
 
   const handleEditImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && (file.type === "image/png" || file.type === "image/jpeg" || file.type === "image/jpg")) {
+    if (
+      file &&
+      (file.type === "image/png" ||
+        file.type === "image/jpeg" ||
+        file.type === "image/jpg")
+    ) {
       setEditImage(file);
       setRemoveImage(false);
       const reader = new FileReader();
@@ -303,11 +333,11 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
         const result = reader.result as string;
         setEditImagePreview(result);
         if (selectedPostId) {
-          setPosts(posts.map(post =>
-            post._id === selectedPostId
-              ? { ...post, image: result }
-              : post
-          ));
+          setPosts(
+            posts.map((post) =>
+              post._id === selectedPostId ? { ...post, image: result } : post
+            )
+          );
         }
       };
       reader.readAsDataURL(file);
@@ -321,11 +351,11 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
     setEditImagePreview("");
     setRemoveImage(true);
     if (selectedPostId) {
-      setPosts(posts.map(post =>
-        post._id === selectedPostId
-          ? { ...post, image: undefined }
-          : post
-      ));
+      setPosts(
+        posts.map((post) =>
+          post._id === selectedPostId ? { ...post, image: undefined } : post
+        )
+      );
     }
   };
 
@@ -345,7 +375,7 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
       setEditLoading(true);
       const formData = new FormData();
       formData.append("body", editBody);
-      
+
       if (editImage) {
         formData.append("image", editImage);
       }
@@ -354,13 +384,16 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
         formData.append("removeImage", "true");
       }
 
-      const response = await fetch(`https://linked-posts.routemisr.com/posts/${selectedPostId}`, {
-        method: "PUT",
-        headers: {
-          'token': token
-        },
-        body: formData
-      });
+      const response = await fetch(
+        `https://linked-posts.routemisr.com/posts/${selectedPostId}`,
+        {
+          method: "PUT",
+          headers: {
+            token: token,
+          },
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -368,16 +401,22 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
       }
 
       const updatedPost = await response.json();
-      
-      setPosts(posts.map(post => 
-        post._id === selectedPostId 
-          ? { 
-              ...post, 
-              body: editBody,
-              image: removeImage ? undefined : (editImage ? updatedPost.image : (editImagePreview || post.image))
-            }
-          : post
-      ));
+
+      setPosts(
+        posts.map((post) =>
+          post._id === selectedPostId
+            ? {
+                ...post,
+                body: editBody,
+                image: removeImage
+                  ? undefined
+                  : editImage
+                  ? updatedPost.image
+                  : editImagePreview || post.image,
+              }
+            : post
+        )
+      );
 
       setEditDialogOpen(false);
       setEditImage(null);
@@ -387,7 +426,11 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
       setRemoveImage(false);
     } catch (error) {
       console.error("Error updating post:", error);
-      alert(error instanceof Error ? error.message : "Failed to update post. Please try again.");
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to update post. Please try again."
+      );
     } finally {
       setEditLoading(false);
     }
@@ -400,18 +443,21 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
     }
 
     try {
-      const response = await fetch(`https://linked-posts.routemisr.com/posts/${selectedPostId}`, {
-        method: "DELETE",
-        headers: {
-          token: token,
-        },
-      });
+      const response = await fetch(
+        `https://linked-posts.routemisr.com/posts/${selectedPostId}`,
+        {
+          method: "DELETE",
+          headers: {
+            token: token,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to delete post");
       }
 
-      setPosts(posts.filter(post => post._id !== selectedPostId));
+      setPosts(posts.filter((post) => post._id !== selectedPostId));
       handleMenuClose();
     } catch (error) {
       console.error("Error deleting post:", error);
@@ -446,11 +492,13 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
     setSelectedPost(null);
     setRemoveImage(false);
     if (selectedPostId && selectedPost) {
-      setPosts(posts.map(post =>
-        post._id === selectedPostId
-          ? { ...post, image: selectedPost.image }
-          : post
-      ));
+      setPosts(
+        posts.map((post) =>
+          post._id === selectedPostId
+            ? { ...post, image: selectedPost.image }
+            : post
+        )
+      );
     }
   };
 
@@ -465,42 +513,47 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
     }
 
     try {
-      setCommentLoading(prev => ({ ...prev, [postId]: true }));
+      setCommentLoading((prev) => ({ ...prev, [postId]: true }));
 
-      const response = await fetch("https://linked-posts.routemisr.com/comments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          token: token,
-        },
-        body: JSON.stringify({
-          content: newComment[postId],
-          post: postId,
-        }),
-      });
+      const response = await fetch(
+        "https://linked-posts.routemisr.com/comments",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            token: token,
+          },
+          body: JSON.stringify({
+            content: newComment[postId],
+            post: postId,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to add comment");
       }
 
       const data: CommentResponse = await response.json();
-      
-      setPosts(posts.map(post => {
-        if (post._id === postId) {
-          return {
-            ...post,
-            comments: [...post.comments, data.comments[0]],
-          };
-        }
-        return post;
-      }));
 
-      setNewComment(prev => ({ ...prev, [postId]: "" }));
+      setPosts(
+        posts.map((post) => {
+          if (post._id === postId) {
+            return {
+              ...post,
+              comments: [...post.comments, data.comments[0]],
+            };
+          }
+          return post;
+        })
+      );
+
+      setNewComment((prev) => ({ ...prev, [postId]: "" }));
     } catch (error) {
       console.error("Error adding comment:", error);
       alert("Failed to add comment");
     } finally {
-      setCommentLoading(prev => ({ ...prev, [postId]: false }));
+      setCommentLoading((prev) => ({ ...prev, [postId]: false }));
     }
   };
 
@@ -534,8 +587,9 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
         }
 
         const data = await response.json();
-        const sortedPosts = data.posts.sort((a: Post, b: Post) => 
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        const sortedPosts = data.posts.sort(
+          (a: Post, b: Post) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
         setPosts(sortedPosts);
       } catch (error) {
@@ -568,9 +622,7 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
   }
 
   return (
-    <Box sx={{backgroundColor: "#070E16"}}>
-           
-
+    <Box sx={{ backgroundColor: "#070E16" }}>
       <Box
         sx={{
           maxWidth: { xs: 300, sm: 500, md: 600 },
@@ -592,8 +644,8 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
               }
               action={
                 <>
-                  <IconButton 
-                    aria-label="settings" 
+                  <IconButton
+                    aria-label="settings"
                     onClick={(e) => handleMenuClick(e, post._id)}
                   >
                     <MoreVertIcon />
@@ -603,7 +655,9 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
                     open={Boolean(anchorEl) && selectedPostId === post._id}
                     onClose={handleMenuClose}
                   >
-                    <MenuItem onClick={() => handleEditClick(post)}>Edit</MenuItem>
+                    <MenuItem onClick={() => handleEditClick(post)}>
+                      Edit
+                    </MenuItem>
                     <MenuItem onClick={handleDelete}>Delete</MenuItem>
                   </Menu>
                 </>
@@ -663,7 +717,7 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
                 <Typography variant="h6" gutterBottom>
                   Comments
                 </Typography>
-                
+
                 {/* Add comment input */}
                 <Box sx={{ mb: 2 }}>
                   <TextField
@@ -671,7 +725,12 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
                     size="small"
                     placeholder="Write a comment..."
                     value={newComment[post._id] || ""}
-                    onChange={(e) => setNewComment(prev => ({ ...prev, [post._id]: e.target.value }))}
+                    onChange={(e) =>
+                      setNewComment((prev) => ({
+                        ...prev,
+                        [post._id]: e.target.value,
+                      }))
+                    }
                     onKeyPress={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
@@ -683,7 +742,10 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
                         <InputAdornment position="end">
                           <IconButton
                             onClick={() => handleCommentSubmit(post._id)}
-                            disabled={commentLoading[post._id] || !newComment[post._id]?.trim()}
+                            disabled={
+                              commentLoading[post._id] ||
+                              !newComment[post._id]?.trim()
+                            }
                             size="small"
                           >
                             {commentLoading[post._id] ? (
@@ -698,33 +760,48 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
                   />
                 </Box>
 
-                <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+                <List sx={{ width: "100%", bgcolor: "background.paper" }}>
                   {post.comments && post.comments.length > 0 ? (
                     <>
                       {post.comments
-                        .slice(0, visibleComments[post._id] || COMMENTS_PER_PAGE)
+                        .slice(
+                          0,
+                          visibleComments[post._id] || COMMENTS_PER_PAGE
+                        )
                         .map((comment, index) => (
                           <React.Fragment key={comment._id}>
                             <ListItem alignItems="flex-start">
                               <ListItemAvatar>
-                                <Avatar 
-                                  src={comment.commentCreator.photo} 
+                                <Avatar
+                                  src={comment.commentCreator.photo}
                                   alt={comment.commentCreator.name}
                                 >
                                   {comment.commentCreator.name[0]}
                                 </Avatar>
                               </ListItemAvatar>
                               {editingComment === comment._id ? (
-                                <Box sx={{ flex: 1, display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                                <Box
+                                  sx={{
+                                    flex: 1,
+                                    display: "flex",
+                                    gap: 1,
+                                    alignItems: "flex-start",
+                                  }}
+                                >
                                   <TextField
                                     fullWidth
                                     size="small"
                                     value={editCommentContent}
-                                    onChange={(e) => setEditCommentContent(e.target.value)}
+                                    onChange={(e) =>
+                                      setEditCommentContent(e.target.value)
+                                    }
                                     onKeyPress={(e) => {
                                       if (e.key === "Enter" && !e.shiftKey) {
                                         e.preventDefault();
-                                        handleEditCommentSubmit(post._id, comment._id);
+                                        handleEditCommentSubmit(
+                                          post._id,
+                                          comment._id
+                                        );
                                       }
                                     }}
                                     autoFocus
@@ -732,10 +809,18 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
                                   <Button
                                     variant="contained"
                                     size="small"
-                                    onClick={() => handleEditCommentSubmit(post._id, comment._id)}
-                                    disabled={editCommentLoading || !editCommentContent.trim()}
+                                    onClick={() =>
+                                      handleEditCommentSubmit(
+                                        post._id,
+                                        comment._id
+                                      )
+                                    }
+                                    disabled={
+                                      editCommentLoading ||
+                                      !editCommentContent.trim()
+                                    }
                                   >
-                                    {editCommentLoading ? 'Saving...' : 'Save'}
+                                    {editCommentLoading ? "Saving..." : "Save"}
                                   </Button>
                                   <Button
                                     variant="outlined"
@@ -755,7 +840,7 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
                                     secondary={
                                       <React.Fragment>
                                         <Typography
-                                          sx={{ display: 'inline' }}
+                                          sx={{ display: "inline" }}
                                           component="span"
                                           variant="body2"
                                           color="text.primary"
@@ -767,25 +852,31 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
                                       </React.Fragment>
                                     }
                                   />
-                                  <ListItemSecondaryAction>
-                                    <IconButton
-                                      edge="end"
-                                      aria-label="comment options"
-                                      onClick={(e) => handleCommentMenuClick(e, comment._id)}
-                                    >
-                                      <MoreVertIcon />
-                                    </IconButton>
-                                  </ListItemSecondaryAction>
+                                  {comment.commentCreator._id ===
+                                    userData?._id && (
+                                    <ListItemSecondaryAction>
+                                      <IconButton
+                                        edge="end"
+                                        aria-label="comment options"
+                                        onClick={(e) =>
+                                          handleCommentMenuClick(e, comment._id)
+                                        }
+                                      >
+                                        <MoreVertIcon />
+                                      </IconButton>
+                                    </ListItemSecondaryAction>
+                                  )}
                                 </>
                               )}
                             </ListItem>
-                            {index < (visibleComments[post._id] || COMMENTS_PER_PAGE) - 1 && (
-                              <Divider variant="inset" component="li" />
-                            )}
+                            {index <
+                              (visibleComments[post._id] || COMMENTS_PER_PAGE) -
+                                1 && <Divider variant="inset" component="li" />}
                           </React.Fragment>
                         ))}
-                      {post.comments.length > (visibleComments[post._id] || COMMENTS_PER_PAGE) && (
-                        <Box sx={{ textAlign: 'center', mt: 2 }}>
+                      {post.comments.length >
+                        (visibleComments[post._id] || COMMENTS_PER_PAGE) && (
+                        <Box sx={{ textAlign: "center", mt: 2 }}>
                           <Button
                             onClick={() => handleShowMoreComments(post._id)}
                             variant="text"
@@ -797,7 +888,11 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
                       )}
                     </>
                   ) : (
-                    <Typography sx={{p:0.5}} variant="body2" color="text.secondary">
+                    <Typography
+                      sx={{ p: 0.5 }}
+                      variant="body2"
+                      color="text.secondary"
+                    >
                       No comments yet
                     </Typography>
                   )}
@@ -813,37 +908,41 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
         open={Boolean(commentMenuAnchorEl)}
         onClose={handleCommentMenuClose}
       >
-        <MenuItem onClick={() => {
-          const comment = posts
-            .flatMap(post => post.comments)
-            .find(comment => comment._id === selectedCommentId);
-          if (comment) {
-            handleEditCommentClick(comment);
-          }
-        }}>
+        <MenuItem
+          onClick={() => {
+            const comment = posts
+              .flatMap((post) => post.comments)
+              .find((comment) => comment._id === selectedCommentId);
+            if (comment) {
+              handleEditCommentClick(comment);
+            }
+          }}
+        >
           <EditIcon sx={{ mr: 1 }} /> Edit
         </MenuItem>
-        <MenuItem onClick={() => {
-          const post = posts.find(post =>
-            post.comments.some(comment => comment._id === selectedCommentId)
-          );
-          if (post && selectedCommentId) {
-            handleDeleteComment(post._id, selectedCommentId);
-          }
-        }}>
+        <MenuItem
+          onClick={() => {
+            const post = posts.find((post) =>
+              post.comments.some((comment) => comment._id === selectedCommentId)
+            );
+            if (post && selectedCommentId) {
+              handleDeleteComment(post._id, selectedCommentId);
+            }
+          }}
+        >
           <DeleteIcon sx={{ mr: 1 }} /> Delete
         </MenuItem>
       </Menu>
 
-      <Dialog 
-        open={editDialogOpen} 
+      <Dialog
+        open={editDialogOpen}
         onClose={handleCloseEditDialog}
         maxWidth="sm"
         fullWidth
       >
         <DialogTitle>Edit Post</DialogTitle>
         <DialogContent>
-          <Card sx={{ boxShadow: 'none' }}>
+          <Card sx={{ boxShadow: "none" }}>
             <CardHeader
               avatar={
                 <Avatar
@@ -851,7 +950,7 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
                   sx={{ bgcolor: red[500] }}
                   aria-label="user"
                 >
-                  {selectedPost?.user.name[0] || ''}
+                  {selectedPost?.user.name[0] || ""}
                 </Avatar>
               }
               title={selectedPost?.user.name}
@@ -867,8 +966,8 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
                 onChange={(e) => setEditBody(e.target.value)}
                 sx={{ mb: 2 }}
               />
-              
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 <input
                   type="file"
                   accept="image/png,image/jpeg,image/jpg"
@@ -876,7 +975,7 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
                   ref={fileInputRef}
                   onChange={handleEditImageChange}
                 />
-                
+
                 <Fab
                   size="small"
                   color="primary"
@@ -884,7 +983,7 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
                   onClick={() => fileInputRef.current?.click()}
                   sx={{
                     bgcolor: green[500],
-                    '&:hover': {
+                    "&:hover": {
                       bgcolor: green[700],
                     },
                   }}
@@ -900,7 +999,7 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
                     onClick={handleRemoveImage}
                     sx={{
                       bgcolor: red[500],
-                      '&:hover': {
+                      "&:hover": {
                         bgcolor: red[700],
                       },
                     }}
@@ -912,24 +1011,30 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
                 <Button
                   variant="contained"
                   onClick={handleEditSubmit}
-                  disabled={editLoading || (!editBody && !editImage && !editImagePreview && !removeImage)}
+                  disabled={
+                    editLoading ||
+                    (!editBody &&
+                      !editImage &&
+                      !editImagePreview &&
+                      !removeImage)
+                  }
                   sx={{
                     bgcolor: green[500],
-                    '&:hover': {
+                    "&:hover": {
                       bgcolor: green[700],
                     },
                   }}
                 >
-                  {editLoading ? 'Saving...' : 'Save Changes'}
+                  {editLoading ? "Saving..." : "Save Changes"}
                 </Button>
               </Box>
 
               {editImagePreview && !removeImage && (
                 <Box sx={{ mt: 2 }}>
-                  <img 
-                    src={editImagePreview} 
-                    alt="Preview" 
-                    style={{ maxWidth: '100%', borderRadius: '4px' }} 
+                  <img
+                    src={editImagePreview}
+                    alt="Preview"
+                    style={{ maxWidth: "100%", borderRadius: "4px" }}
                   />
                 </Box>
               )}
@@ -945,10 +1050,7 @@ export default function PostList({ refreshTrigger = 0 }: PostListProps) {
         onClick={handleCloseModal}
       >
         <Box sx={{ position: "relative" }}>
-          <IconButton
-            onClick={handleCloseModal}
-            sx={closeButtonStyle}
-          >
+          <IconButton onClick={handleCloseModal} sx={closeButtonStyle}>
             <CloseIcon />
           </IconButton>
           {selectedImage && (
